@@ -95,7 +95,15 @@
 
       <div class="panel hidden testPanel" id="testCard"><div class="testHead"><div><div class="stepBadge">3/4</div><b id="who"></b><small data-i18n="testRule">Әр сұрақта бір дұрыс жауап бар.</small></div><div class="timer" id="timer">30:00</div></div><div class="progress"><i id="progressBar"></i></div><form id="testForm"></form><button class="btn primary full" id="finishBtn" type="button" data-i18n="finish">Тестті аяқтау</button></div>
 
-      <div class="panel hidden" id="resultCard"><div class="result"><div class="stepBadge">4/4</div><div data-i18n="yourScore">Сіздің нәтижеңіз</div><div class="score" id="score"></div><h2 id="award"></h2><div class="dipNo" id="diplomaNo"></div><button class="btn primary noprint" type="button" id="printBtn" data-i18n="printDiploma">Дипломды сақтау / басып шығару</button></div><div class="diploma" id="diploma"><div class="dipTop"><img src="/static/logo.jpg" alt="logo"><div>КЕНГУРУ<small data-i18n="dipSub">математикалық ойын-конкурсы</small></div></div><div class="dipLabel" data-i18n="diploma">ДИПЛОМ</div><p data-i18n="diplomaText">математикалық ойын-конкурсқа қатысып, жоғары нәтиже көрсеткені үшін</p><div class="name" id="dipName"></div><h3 id="dipAward"></h3><p id="dipGrade"></p><p id="dipSchool"></p><div class="dipFooter"><span id="dipNo"></span><span>2026</span></div></div></div>
+      <div class="panel hidden" id="resultCard"><div class="result"><div class="stepBadge">4/4</div><div data-i18n="yourScore">Сіздің нәтижеңіз</div><div class="score" id="score"></div><h2 id="award"></h2><div class="dipNo" id="diplomaNo"></div><button class="btn primary noprint" type="button" id="printBtn" data-i18n="printDiploma">Дипломды сақтау / басып шығару</button></div><div class="diploma diplomaTemplate" id="diploma">
+  <img class="diplomaBg" id="dipBg" src="/static/diploma_template.png" alt="Диплом">
+  <div class="templateDateFix">15–30 ҚЫРКҮЙЕК</div>
+  <div class="templateField templateName" id="dipName"></div>
+  <div class="templateField templateSchool" id="dipSchool"></div>
+  <div class="templateField templateGrade" id="dipGrade"></div>
+  <div class="templateField templateAward" id="dipAward"></div>
+  <div class="templateField templateNo" id="dipNo"></div>
+</div></div>
     </div>
   </div>
 </section>

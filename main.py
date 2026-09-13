@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from pathlib import Path
-import sqlite3, secrets, random, os, hashlib
+import sqlite3, secrets, random, os, hashlib, shutil
 from datetime import datetime, timezone, timedelta
 
 BASE = Path(__file__).parent
@@ -14,7 +14,16 @@ ADMIN_PASSWORD = os.getenv('KENGURU_ADMIN_PASSWORD', 'change-me-now')
 TEST_SECONDS = 30 * 60
 GRACE_SECONDS = 45
 app = FastAPI(title='Kenguru Olympiad')
-app.mount('/static', StaticFiles(directory=BASE/'static'), name='static')
+STATIC_DIR = BASE / 'static'
+STATIC_DIR.mkdir(exist_ok=True)
+# Render production currently keeps web assets at repository root and copies the core files
+# into /static at start. Copy certificate backgrounds too so the official templates are served.
+for _asset in ('diploma_template.png', 'certificate_template.png'):
+    _src = BASE / _asset
+    _dst = STATIC_DIR / _asset
+    if _src.exists():
+        shutil.copy2(_src, _dst)
+app.mount('/static', StaticFiles(directory=STATIC_DIR), name='static')
 
 def db():
     conn = sqlite3.connect(DB)
@@ -464,7 +473,7 @@ def submit(s: SubmitTest):
         qids=(row['question_ids'] or '').split(',')
         score=sum(1 for qid in qids if qid and s.answers.get(qid)==qmap[qid]['answer'])
         award='I орын' if score>=26 else ('II орын' if score>=21 else ('III орын' if score>=16 else 'Қатысушы сертификаты'))
-        diploma='KNG-'+datetime.now().strftime('%Y%m')+'-'+secrets.token_hex(3).upper()
+        diploma=f"KENG-2026-{row['id']:06d}"
         now=datetime.now(timezone.utc).isoformat()
         c.execute('UPDATE participants SET submitted_at=?,score=?,award=?,diploma_no=? WHERE token=?',(now,score,award,diploma,s.token))
     return {'score':score,'award':award,'diploma_no':diploma}

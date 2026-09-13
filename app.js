@@ -18,7 +18,22 @@ async function loadTest(){if(currentTest)return;let r=await fetch('/api/test/'+e
 function updateProgress(){let n=new Set([...new FormData(byId('testForm')).keys()]).size;byId('progressBar').style.width=(n/30*100)+'%'}
 function tick(){byId('timer').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0')}
 async function submitTest(){if(!currentTest)return;clearInterval(timerId);let answers={};new FormData(byId('testForm')).forEach((v,k)=>answers[k]=v);let r=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,answers})});if(!r.ok){alert(await r.text());return}let j=await r.json();let s=await (await fetch('/api/status/'+encodeURIComponent(token))).json();showResult({...s,...j})}
-function showResult(s){currentTest=null;clearInterval(timerId);showOnly('resultCard');uiLang=s.lang||uiLang;applyLang();byId('score').textContent=(s.score??0)+'/30';byId('award').textContent=localAward(s.award);byId('diplomaNo').textContent=s.diploma_no||'';byId('dipName').textContent=s.full_name||'';byId('dipAward').textContent=localAward(s.award);byId('dipGrade').textContent=(s.grade||'')+(uiLang==='kk'?' сынып':' класс');byId('dipSchool').textContent=s.school||'';byId('dipNo').textContent='№ '+(s.diploma_no||'')}
+function showResult(s){
+ currentTest=null;clearInterval(timerId);showOnly('resultCard');uiLang=s.lang||uiLang;applyLang();
+ const isCertificate=(s.award||'').includes('сертификаты');
+ const place=(s.award||'').match(/^(I{1,3})/);
+ byId('score').textContent=(s.score??0)+'/30';
+ byId('award').textContent=localAward(s.award);
+ byId('diplomaNo').textContent=s.diploma_no||'';
+ byId('dipBg').src=isCertificate?'/static/certificate_template.png':'/static/diploma_template.png';
+ byId('diploma').classList.toggle('certificate',isCertificate);
+ byId('dipName').textContent=s.full_name||'';
+ byId('dipSchool').textContent=s.school||'';
+ byId('dipGrade').textContent=s.grade||'';
+ byId('dipAward').textContent=place?place[1]:'';
+ byId('dipNo').textContent='№ '+(s.diploma_no||'');
+ byId('printBtn').textContent=isCertificate?(uiLang==='kk'?'Сертификатты сақтау / басып шығару':'Сохранить / распечатать сертификат'):(uiLang==='kk'?'Дипломды сақтау / басып шығару':'Сохранить / распечатать диплом');
+}
 function localAward(a){if(uiLang==='kk')return a||'';return {'I орын':'I место','II орын':'II место','III орын':'III место','Қатысушы сертификаты':'Сертификат участника'}[a]||a||''}
 function esc(x){return String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}function escAttr(x){return esc(x)}
 applyLang();if(token)checkStatus();

@@ -2,3 +2,28 @@
 @media(max-width:900px){.navrow nav a{display:none}.hero{padding-top:48px}.heroGrid,.sectionHead,.regGrid{grid-template-columns:1fr}.heroGrid{gap:34px}.heroCard{max-width:520px}.cards4,.awards{grid-template-columns:1fr 1fr}.regIntro{position:static}.sectionHead{gap:14px}.difficulty{grid-template-columns:1fr}.difficulty div{border-right:0;border-bottom:1px solid var(--line)}.difficulty div:last-child{border-bottom:0}.payBox{grid-template-columns:1fr}.payBox img{width:180px}}
 @media(max-width:600px){.wrap{width:min(100% - 24px,1160px)}.navrow{height:68px}.brand img{width:44px;height:44px}.brand b{font-size:17px}.hero{padding:42px 0}.heroGrid{gap:28px}h1{font-size:46px}.lead{font-size:16px}.heroButtons{display:grid}.miniFacts span{font-size:15px}.heroCard{padding:22px}.cards4,.awards,.formgrid{grid-template-columns:1fr}.wide{grid-column:auto}.section{padding:55px 0}.panel{padding:20px;border-radius:20px}.testHead{top:68px;padding:16px}.question{padding:22px 18px}.diploma{padding:34px 20px;min-height:580px}.dipLabel{font-size:42px;margin-top:45px}.diploma .name{font-size:26px}.foot{display:grid;gap:14px}.payBox .btn{width:100%;margin-right:0}}
 @media print{body *{visibility:hidden}.diploma,.diploma *{visibility:visible}.diploma{position:absolute;inset:0;width:100%;margin:0;border:8px double var(--blue);print-color-adjust:exact;-webkit-print-color-adjust:exact}.noprint{display:none!important}}
+
+/* KENG 2026 official diploma / certificate templates */
+.diplomaTemplate{position:relative;margin:20px auto 0;padding:0;border:0;width:100%;max-width:1120px;min-height:0;aspect-ratio:1414/1000;overflow:hidden;background:#fff;box-shadow:0 14px 40px rgba(13,52,86,.13)}
+.diplomaTemplate .diplomaBg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}
+.diplomaTemplate .templateField{position:absolute;z-index:2;color:#0b2551;text-align:center;font-family:Arial,sans-serif;font-weight:700;line-height:1.08;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diplomaTemplate .templateName{left:21%;top:47.0%;width:58%;font-size:clamp(13px,2.05vw,29px);font-weight:800}
+.diplomaTemplate .templateSchool{left:21%;top:54.0%;width:58%;font-size:clamp(11px,1.45vw,20px);font-weight:600}
+.diplomaTemplate .templateGrade{left:29.4%;top:61.5%;width:11%;font-size:clamp(12px,1.7vw,24px);font-weight:800}
+.diplomaTemplate .templateAward{left:69.3%;top:61.5%;width:10%;font-size:clamp(12px,1.7vw,24px);font-weight:800}
+.diplomaTemplate .templateNo{right:3.1%;bottom:2.7%;width:25%;font-size:clamp(8px,.92vw,13px);font-weight:750;color:#102b54;text-align:center}
+.diplomaTemplate.certificate .templateName{left:20.5%;top:47.1%;width:58%;}
+.diplomaTemplate.certificate .templateSchool{left:20.5%;top:53.8%;width:58%;}
+.diplomaTemplate.certificate .templateGrade{left:29.2%;top:60.7%;width:45%;text-align:left;padding-left:1%;}
+.diplomaTemplate.certificate .templateAward{display:none}
+.diplomaTemplate.certificate .templateNo{right:3.1%;bottom:2.7%;}
+@media(max-width:600px){.diplomaTemplate{width:100%;}.diplomaTemplate .templateNo{font-size:7px}}
+@media print{
+ @page{size:A4 landscape;margin:0}
+ html,body{width:297mm;height:210mm;margin:0!important;padding:0!important;background:#fff!important}
+ body *{visibility:hidden!important}
+ .diplomaTemplate,.diplomaTemplate *{visibility:visible!important}
+ .diplomaTemplate{position:fixed!important;left:0!important;top:0!important;width:297mm!important;height:210mm!important;max-width:none!important;margin:0!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+ .noprint{display:none!important}
+}
+.diplomaTemplate .templateDateFix{position:absolute;z-index:3;right:2.4%;top:16.45%;width:21.2%;height:4.25%;display:flex;align-items:center;justify-content:center;background:rgba(238,248,255,.97);color:#071a3a;font-family:Arial,sans-serif;font-weight:800;font-size:clamp(10px,1.7vw,24px);line-height:1;letter-spacing:.01em}
