@@ -63,7 +63,26 @@ def register_admin_extra(app):
             m=_main()
             from question_bank_v2 import build_all
             m.BANK=build_all(m.BANK)
-            print('[KENGURU] diverse question bank v2 loaded: 11 grades x 30')
+            print('[KENGURU] diverse question bank v3 loaded: 11 grades x 30')
+
+            # One-time migration: old question_overrides were created from the previous bank
+            # and would otherwise replace the new V3 questions after every restart.
+            _tables(m)
+            with m.db() as c:
+                c.execute("""CREATE TABLE IF NOT EXISTS app_meta(
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )""")
+                row=c.execute("SELECT value FROM app_meta WHERE key=?",('question_bank_version',)).fetchone()
+                version=(row['value'] if row else None)
+                if version!='v3-all-changed':
+                    c.execute("DELETE FROM question_overrides")
+                    c.execute("""INSERT INTO app_meta(key,value) VALUES(?,?)
+                                 ON CONFLICT(key) DO UPDATE SET value=excluded.value""",
+                              ('question_bank_version','v3-all-changed'))
+                    print('[KENGURU] old question overrides cleared for V3')
+
+            # Now load only overrides created after V3 became active.
             _load_overrides(m)
             print('[KENGURU] admin data loaded')
         except Exception as e: print('[KENGURU] startup load error:',repr(e))
