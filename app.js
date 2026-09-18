@@ -222,9 +222,18 @@ function showResult(s){
   byId('dipSchool').textContent=s.school||'';
   byId('dipGrade').textContent=s.grade||'';
   byId('dipAward').textContent=place?place[1]:'';
-  byId('dipSupervisor').textContent=s.supervisor?'Жетекшісі: '+s.supervisor:'';
+  const supervisorEl=byId('dipSupervisor');
+  supervisorEl.textContent=s.supervisor?'Жетекшісі: '+s.supervisor:'';
+  fitSupervisorText(supervisorEl,isCertificate);
   byId('dipNo').textContent='№ '+(s.diploma_no||'');
   byId('printBtn').textContent=isCertificate?(uiLang==='kk'?'Сертификатты сақтау / басып шығару':'Сохранить / распечатать сертификат'):(uiLang==='kk'?'Дипломды сақтау / басып шығару':'Сохранить / распечатать диплом')
+}
+function fitSupervisorText(el,isCertificate){
+  const length=(el.textContent||'').trim().length;
+  const base=isCertificate?1.28:1.32;
+  const size=length>72?0.86:length>60?1.0:length>50?1.15:base;
+  el.style.fontSize=size+'cqw';
+  el.style.whiteSpace='nowrap';
 }
 function localAward(a){
   if(uiLang==='kk')return a||'';
