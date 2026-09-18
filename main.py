@@ -41,6 +41,7 @@ def init_db():
             region TEXT NOT NULL,
             locality TEXT NOT NULL,
             school TEXT NOT NULL,
+            supervisor TEXT NOT NULL DEFAULT '',
             grade INTEGER NOT NULL,
             payment_status TEXT NOT NULL DEFAULT 'unpaid',
             created_at TEXT NOT NULL,
@@ -51,6 +52,12 @@ def init_db():
             award TEXT,
             diploma_no TEXT UNIQUE
         )''')
+        if getattr(sqlite3, '__name__', '') == 'pgcompat':
+            c.execute("ALTER TABLE participants ADD COLUMN IF NOT EXISTS supervisor TEXT NOT NULL DEFAULT ''")
+        else:
+            columns = {row['name'] for row in c.execute('PRAGMA table_info(participants)').fetchall()}
+            if 'supervisor' not in columns:
+                c.execute("ALTER TABLE participants ADD COLUMN supervisor TEXT NOT NULL DEFAULT ''")
 init_db()
 
 # Original, generated-style question bank. The uploaded Kangaroo example is used only as a style reference.
@@ -385,6 +392,7 @@ class Registration(BaseModel):
     region: str = Field(min_length=2, max_length=100)
     locality: str = Field(min_length=2, max_length=100)
     school: str = Field(min_length=2, max_length=180)
+    supervisor: str = Field(min_length=3, max_length=120)
     grade: int = Field(ge=1, le=11)
 
 class PaymentMark(BaseModel):
@@ -412,8 +420,8 @@ def register(r: Registration):
     token=secrets.token_urlsafe(18)
     now=datetime.now(timezone.utc).isoformat()
     with db() as c:
-        c.execute('INSERT INTO participants(token,lang,full_name,phone,region,locality,school,grade,created_at) VALUES(?,?,?,?,?,?,?,?,?)',
-                  (token,r.lang,r.full_name.strip(),r.phone.strip(),r.region.strip(),r.locality.strip(),r.school.strip(),r.grade,now))
+        c.execute('INSERT INTO participants(token,lang,full_name,phone,region,locality,school,supervisor,grade,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+                  (token,r.lang,r.full_name.strip(),r.phone.strip(),r.region.strip(),r.locality.strip(),r.school.strip(),r.supervisor.strip(),r.grade,now))
     return {'token':token,'price':PRICE,'pay_url':PAY_URL}
 
 @app.post('/api/payment-mark')

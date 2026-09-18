@@ -11,11 +11,13 @@
 .diplomaTemplate .templateSchool{left:21%;top:54.0%;width:58%;font-size:clamp(11px,1.45vw,20px);font-weight:600}
 .diplomaTemplate .templateGrade{left:29.4%;top:61.5%;width:11%;font-size:clamp(12px,1.7vw,24px);font-weight:800}
 .diplomaTemplate .templateAward{left:69.3%;top:61.5%;width:10%;font-size:clamp(12px,1.7vw,24px);font-weight:800}
+.diplomaTemplate .templateSupervisor{left:15%;top:65.0%;width:70%;font-size:clamp(9px,1.32vw,19px);font-weight:700;color:#102b54}
 .diplomaTemplate .templateNo{right:3.1%;bottom:2.7%;width:25%;font-size:clamp(8px,.92vw,13px);font-weight:750;color:#102b54;text-align:center}
 .diplomaTemplate.certificate .templateName{left:20.5%;top:47.1%;width:58%;}
 .diplomaTemplate.certificate .templateSchool{left:20.5%;top:53.8%;width:58%;}
 .diplomaTemplate.certificate .templateGrade{left:29.2%;top:60.7%;width:45%;text-align:left;padding-left:1%;}
 .diplomaTemplate.certificate .templateAward{display:none}
+.diplomaTemplate.certificate .templateSupervisor{left:20%;top:63.0%;width:60%;font-size:clamp(9px,1.28vw,18px)}
 .diplomaTemplate.certificate .templateNo{right:3.1%;bottom:2.7%;}
 @media(max-width:600px){.diplomaTemplate{width:100%;}.diplomaTemplate .templateNo{font-size:7px}}
 @media print{

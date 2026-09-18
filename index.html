@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0d4f8b">
   <title>Кенгуру — математикалық ойын-конкурс</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css?v=8">
 </head>
 <body>
 <header class="topbar">
@@ -82,6 +82,7 @@
           <div><label data-i18n="region">Облыс / қала</label><select id="region" required></select></div>
           <div><label data-i18n="locality">Елді мекен</label><input id="locality" required></div>
           <div class="wide"><label data-i18n="school">Мектеп / білім беру ұйымы</label><input id="school" required></div>
+          <div class="wide"><label data-i18n="supervisor">Жетекшінің аты-жөні толық</label><input id="supervisor" required autocomplete="off"></div>
           <div class="wide consent"><label><input type="checkbox" id="consent" required><span data-i18n="consent">Олимпиадаға қатысу және диплом рәсімдеу үшін дербес деректерді өңдеуге келісемін.</span></label></div>
           <div class="wide"><button class="btn primary full" type="submit" data-i18n="toPay">Төлемге өту — 1000 ₸</button></div>
         </form>
@@ -102,6 +103,7 @@
   <div class="templateField templateSchool" id="dipSchool"></div>
   <div class="templateField templateGrade" id="dipGrade"></div>
   <div class="templateField templateAward" id="dipAward"></div>
+  <div class="templateField templateSupervisor" id="dipSupervisor"></div>
   <div class="templateField templateNo" id="dipNo"></div>
 </div></div>
     </div>
@@ -109,6 +111,6 @@
 </section>
 </main>
 <footer><div class="wrap foot"><div><b>КЕНГУРУ</b><small data-i18n="footText">1–11 сынып оқушыларына арналған математикалық ойын-конкурс</small></div><a href="/admin" data-i18n="org">Ұйымдастырушы панелі</a></div></footer>
-<script src="/static/app.js?v=7"></script>
+<script src="/static/app.js?v=8"></script>
 <script src="/static/apipay_ui.js?v=6"></script>
 </body></html>

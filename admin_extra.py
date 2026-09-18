@@ -131,7 +131,7 @@ def register_admin_extra(app):
     def admin_export(password:str):
         m=_auth(password)
         with m.db() as c: rows=c.execute('SELECT * FROM participants ORDER BY id').fetchall()
-        sio=io.StringIO(); fields=['id','full_name','grade','phone','region','locality','school','payment_status','score','award','diploma_no','created_at','submitted_at']
+        sio=io.StringIO(); fields=['id','full_name','grade','phone','region','locality','school','supervisor','payment_status','score','award','diploma_no','created_at','submitted_at']
         w=csv.DictWriter(sio,fieldnames=fields,extrasaction='ignore'); w.writeheader()
         for r in rows: w.writerow(dict(r))
         return StreamingResponse(io.BytesIO(sio.getvalue().encode('utf-8-sig')),media_type='text/csv; charset=utf-8',headers={'Content-Disposition':'attachment; filename="kenguru_participants.csv"'})

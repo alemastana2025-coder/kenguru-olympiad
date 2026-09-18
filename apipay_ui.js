@@ -113,6 +113,7 @@
         region: $('region').value,
         locality: $('locality').value.trim(),
         school: $('school').value.trim(),
+        supervisor: $('supervisor').value.trim(),
         grade: +$('grade').value
       };
 

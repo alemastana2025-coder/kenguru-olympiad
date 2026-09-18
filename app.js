@@ -1,4 +1,4 @@
-// KENGURU main UI V7 — ApiPay is built directly into the main script.
+// KENGURU main UI V8 — supervisor details flow from registration to the diploma.
 window.__KENGURU_APIPAY_V6__ = true; // disables the old separate ApiPay patch
 
 let uiLang='kk', token=localStorage.getItem('kng_token')||'',
@@ -21,7 +21,7 @@ a1:'I орын',a2:'II орын',a3:'III орын',a4:'Қатысушы серт
 regText:'Деректер дипломға автоматты түрде түседі. Аты-жөні мен мектеп атауын мұқият тексеріңіз.',
 oneAttempt:'1 мүмкіндік',oneAttemptText:'Тест басталғаннан кейін таймер серверде де есептеледі.',
 language:'Олимпиада тілі',grade:'Сынып',name:'Оқушының аты-жөні толық',phone:'Ата-ананың телефон нөмірі',
-region:'Облыс / қала',locality:'Елді мекен',school:'Мектеп / білім беру ұйымы',
+region:'Облыс / қала',locality:'Елді мекен',school:'Мектеп / білім беру ұйымы',supervisor:'Жетекшінің аты-жөні толық',
 consent:'Олимпиадаға қатысу және диплом рәсімдеу үшін дербес деректерді өңдеуге келісемін.',
 toPay:'Төлемге өту — 1000 ₸',payTitle:'Қатысу жарнасын төлеңіз — 1000 ₸',
 payText:'Жеке QR-код арқылы төлеңіз. Төлем расталған соң тест автоматты түрде ашылады.',
@@ -46,7 +46,7 @@ a1:'I место',a2:'II место',a3:'III место',a4:'Сертифика�
 regText:'Данные автоматически попадут в диплом. Внимательно проверьте ФИО и название школы.',
 oneAttempt:'1 попытка',oneAttemptText:'После старта таймер учитывается также на сервере.',
 language:'Язык олимпиады',grade:'Класс',name:'ФИО ученика полностью',phone:'Телефон родителя',
-region:'Область / город',locality:'Населённый пункт',school:'Школа / организация образования',
+region:'Область / город',locality:'Населённый пункт',school:'Школа / организация образования',supervisor:'ФИО руководителя полностью',
 consent:'Согласен(на) на обработку персональных данных для участия и оформления диплома.',
 toPay:'Перейти к оплате — 1000 ₸',payTitle:'Оплатите участие — 1000 ₸',
 payText:'Оплатите по индивидуальному QR. После подтверждения оплаты тест откроется автоматически.',
@@ -148,6 +148,7 @@ byId('regForm').addEventListener('submit',async e=>{
   let data={
     lang:byId('lang').value,full_name:byId('full_name').value.trim(),phone:byId('phone').value.trim(),
     region:byId('region').value,locality:byId('locality').value.trim(),school:byId('school').value.trim(),
+    supervisor:byId('supervisor').value.trim(),
     grade:+byId('grade').value
   };
   let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
@@ -221,6 +222,7 @@ function showResult(s){
   byId('dipSchool').textContent=s.school||'';
   byId('dipGrade').textContent=s.grade||'';
   byId('dipAward').textContent=place?place[1]:'';
+  byId('dipSupervisor').textContent=s.supervisor?'Жетекшісі: '+s.supervisor:'';
   byId('dipNo').textContent='№ '+(s.diploma_no||'');
   byId('printBtn').textContent=isCertificate?(uiLang==='kk'?'Сертификатты сақтау / басып шығару':'Сохранить / распечатать сертификат'):(uiLang==='kk'?'Дипломды сақтау / басып шығару':'Сохранить / распечатать диплом')
 }
@@ -239,4 +241,4 @@ if(token){
     if(cached){showInvoice(cached);startPaymentPoll()}
   })
 }
-console.log('[KENGURU] MAIN UI V7 + APIPAY ACTIVE');
+console.log('[KENGURU] MAIN UI V8 + APIPAY ACTIVE');
