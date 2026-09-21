@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from pathlib import Path
 import sqlite3, secrets, random, os, hashlib, shutil
 from datetime import datetime, timezone, timedelta
+from question_languages import localized_options, answer_is_correct
 
 BASE = Path(__file__).parent
 DB = BASE / 'kenguru.sqlite3'
@@ -458,7 +459,7 @@ def get_test(token:str):
     out=[]
     for qid in ids:
         q=qmap[qid]
-        out.append({'id':q['id'],'text':q[lang],'options':q['options'],'points':q['points']})
+        out.append({'id':q['id'],'text':q[lang],'options':localized_options(q,lang),'points':q['points']})
     started = datetime.fromisoformat(row['started_at']) if row['started_at'] else datetime.now(timezone.utc)
     elapsed = max(0, int((datetime.now(timezone.utc) - started).total_seconds()))
     seconds_left = max(0, TEST_SECONDS - elapsed)
@@ -479,7 +480,7 @@ def submit(s: SubmitTest):
             s.answers = {}
         qmap={q['id']:q for q in BANK[row['grade']]}
         qids=(row['question_ids'] or '').split(',')
-        score=sum(1 for qid in qids if qid and s.answers.get(qid)==qmap[qid]['answer'])
+        score=sum(1 for qid in qids if qid and answer_is_correct(qmap[qid],s.answers.get(qid),row['lang']))
         award='I орын' if score>=26 else ('II орын' if score>=21 else ('III орын' if score>=16 else 'Қатысушы сертификаты'))
         diploma=f"KENG-2026-{row['id']:06d}"
         now=datetime.now(timezone.utc).isoformat()
