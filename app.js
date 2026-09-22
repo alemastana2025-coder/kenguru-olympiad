@@ -209,7 +209,7 @@ async function checkStatus(){
 async function loadTest(){
   if(currentTest || testLoading)return; testLoading=true;
   let r=await fetch('/api/test/'+encodeURIComponent(token));
-  if(!r.ok){alert(await r.text());return}
+  if(!r.ok){testLoading=false;alert(await r.text());return}
   currentTest=await r.json();uiLang=currentTest.lang;applyLang();
   byId('who').textContent=currentTest.full_name+' · '+currentTest.grade+(uiLang==='kk'?' сынып':' класс');
   byId('testForm').innerHTML=currentTest.questions.map((q,i)=>`<div class="question"><div class="qmeta">${i+1}/30 · ${q.points} ${uiLang==='kk'?'балл деңгейі':'балла уровень'}</div><h3>${esc(q.text)}</h3><div class="opts">${q.options.map((o,k)=>`<label class="opt"><input type="radio" name="${q.id}" value="${escAttr(o)}"><b>${String.fromCharCode(65+k)})</b> ${esc(o)}</label>`).join('')}</div></div>`).join('');
