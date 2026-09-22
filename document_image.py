@@ -1,15 +1,27 @@
 """Server-rendered KENGURU diploma/certificate PNG downloads."""
 
+from collections import OrderedDict
+from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
+from threading import Lock
 from urllib.parse import quote
 
 import qrcode
 from fastapi import HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 from PIL import Image, ImageDraw, ImageFont
 
 
+# The Render instance has 512 MB RAM.  Pillow font loading and several parallel
+# PNG encoders can exceed that limit, so document creation is serialized and a
+# small bounded cache is shared by repeated open/download requests.
+_DOCUMENT_CACHE = OrderedDict()
+_DOCUMENT_CACHE_LIMIT = 16
+_DOCUMENT_LOCK = Lock()
+
+
+@lru_cache(maxsize=128)
 def _font(base: Path, size: int, bold: bool = True):
     name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
     font_size = max(8, int(size))
@@ -49,7 +61,8 @@ def _render_document(base: Path, row, verify_url: str):
     award = str(row["award"] or "")
     certificate = "сертификаты" in award.lower()
     template = base / ("certificate_template.png" if certificate else "diploma_template.png")
-    image = Image.open(template).convert("RGBA")
+    with Image.open(template) as source:
+        image = source.convert("RGBA")
     draw = ImageDraw.Draw(image)
     width, height = image.size
     sx, sy = width / 1414, height / 1000
@@ -91,9 +104,57 @@ def _render_document(base: Path, row, verify_url: str):
     image.alpha_composite(qr, (qr_x, qr_y))
 
     output = BytesIO()
-    image.convert("RGB").save(output, "PNG", optimize=True)
-    output.seek(0)
-    return output, number
+    rgb = image.convert("RGB")
+    palette = rgb.quantize(
+        colors=256,
+        method=Image.Quantize.MEDIANCUT,
+        dither=Image.Dither.NONE,
+    )
+    try:
+        # optimize=True is extremely CPU-heavy on Render's 0.15 CPU instance.
+        # A 256-colour palette keeps the PNG around 60% smaller while remaining
+        # fast enough for the small instance and visually sharp for diplomas.
+        palette.save(output, "PNG", optimize=False, compress_level=3)
+        payload = output.getvalue()
+    finally:
+        output.close()
+        palette.close()
+        rgb.close()
+        qr.close()
+        image.close()
+    return payload, number
+
+
+def _document_cache_key(base: Path, row, verify_url: str):
+    award = str(row["award"] or "")
+    certificate = "сертификаты" in award.lower()
+    template = base / ("certificate_template.png" if certificate else "diploma_template.png")
+    try:
+        template_revision = template.stat().st_mtime_ns
+    except OSError:
+        template_revision = 0
+    return (
+        str(base), template_revision, str(row["full_name"] or ""),
+        str(row["school"] or ""), str(row["supervisor"] or ""),
+        str(row["grade"] or ""), award, str(row["diploma_no"] or ""),
+        verify_url,
+    )
+
+
+def _cached_document(base: Path, row, verify_url: str):
+    key = _document_cache_key(base, row, verify_url)
+    with _DOCUMENT_LOCK:
+        cached = _DOCUMENT_CACHE.get(key)
+        if cached is not None:
+            _DOCUMENT_CACHE.move_to_end(key)
+            return cached
+
+        rendered = _render_document(base, row, verify_url)
+        _DOCUMENT_CACHE[key] = rendered
+        _DOCUMENT_CACHE.move_to_end(key)
+        while len(_DOCUMENT_CACHE) > _DOCUMENT_CACHE_LIMIT:
+            _DOCUMENT_CACHE.popitem(last=False)
+        return rendered
 
 
 def register_document_route(app, db, base_path):
@@ -112,14 +173,15 @@ def register_document_route(app, db, base_path):
 
         origin = str(request.base_url).rstrip("/")
         verify_url = f"{origin}/verify?no={quote(str(row['diploma_no']))}"
-        output, number = _render_document(base, row, verify_url)
+        payload, number = _cached_document(base, row, verify_url)
         disposition = "attachment" if download else "inline"
         filename = f"KENGURU-{number}.png"
-        return StreamingResponse(
-            output,
+        return Response(
+            content=payload,
             media_type="image/png",
             headers={
                 "Content-Disposition": f'{disposition}; filename="{filename}"',
-                "Cache-Control": "private, no-store",
+                "Cache-Control": "private, max-age=300",
+                "Content-Length": str(len(payload)),
             },
         )

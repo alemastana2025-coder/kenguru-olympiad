@@ -23,13 +23,15 @@ class QuestionLanguageTests(unittest.TestCase):
         cls.temp = tempfile.TemporaryDirectory()
         cls.root = Path(cls.temp.name)
         source = Path(__file__).resolve().parent
-        for name in ('main.py', 'admin_extra.py', 'question_bank_final.py', 'question_languages.py', 'document_image.py'):
+        for name in ('main.py', 'admin_extra.py', 'question_bank_final.py', 'question_languages.py',
+                     'document_image.py', 'diploma_template.png', 'certificate_template.png'):
             shutil.copy2(source / name, cls.root / name)
         sys.path.insert(0, str(cls.root))
         cls.main = importlib.import_module('main')
         cls.admin = importlib.import_module('admin_extra')
         cls.bank = importlib.import_module('question_bank_final').BANK
         cls.labels = importlib.import_module('question_languages')
+        cls.documents = importlib.import_module('document_image')
         cls.admin.register_admin_extra(cls.main.app)
 
     @classmethod
@@ -198,6 +200,30 @@ class QuestionLanguageTests(unittest.TestCase):
             saved = dict(c.execute("SELECT * FROM participants WHERE token='active-edit'").fetchone())
         self.assertEqual(saved['full_name'], 'ДҰРЫС АТЫ ЖӨНІ')
         self.assertEqual(saved['question_ids'], unchanged['question_ids'])
+
+    def test_cached_document_download_does_not_block_payment_approval(self):
+        self.participant('document', grade=5, started=True, submitted=True)
+        self.participant('approve-me', payment='pending')
+        self.documents._DOCUMENT_CACHE.clear()
+
+        opened = self.client.get('/api/document/document')
+        downloaded = self.client.get('/api/document/document?download=1')
+        self.assertEqual(opened.status_code, 200, opened.text)
+        self.assertEqual(downloaded.status_code, 200, downloaded.text)
+        self.assertEqual(opened.content[:8], b'\x89PNG\r\n\x1a\n')
+        self.assertEqual(opened.content, downloaded.content)
+        self.assertEqual(len(self.documents._DOCUMENT_CACHE), 1)
+        self.assertEqual(opened.headers['content-length'], str(len(opened.content)))
+
+        approved = self.client.post('/api/admin/action', json={
+            'password': self.main.ADMIN_PASSWORD,
+            'token': 'approve-me',
+            'action': 'approve',
+        })
+        self.assertEqual(approved.status_code, 200, approved.text)
+        with self.main.db() as c:
+            row = c.execute("SELECT payment_status FROM participants WHERE token='approve-me'").fetchone()
+        self.assertEqual(row['payment_status'], 'paid')
 
     def test_database_question_overrides_keep_translations_after_admin_save(self):
         question = copy.deepcopy(self.bank[1][7])
