@@ -23,7 +23,7 @@ class QuestionLanguageTests(unittest.TestCase):
         cls.temp = tempfile.TemporaryDirectory()
         cls.root = Path(cls.temp.name)
         source = Path(__file__).resolve().parent
-        for name in ('main.py', 'admin_extra.py', 'question_bank_final.py', 'question_languages.py'):
+        for name in ('main.py', 'admin_extra.py', 'question_bank_final.py', 'question_languages.py', 'document_image.py'):
             shutil.copy2(source / name, cls.root / name)
         sys.path.insert(0, str(cls.root))
         cls.main = importlib.import_module('main')

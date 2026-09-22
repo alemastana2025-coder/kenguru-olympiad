@@ -2,7 +2,8 @@
 window.__KENGURU_APIPAY_V6__ = true; // disables the old separate ApiPay patch
 
 let uiLang='kk', token=localStorage.getItem('kng_token')||'',
-    timerId=null, payPoll=null, left=1800, currentTest=null;
+    timerId=null, payPoll=null, left=1800, currentTest=null,
+    documentFile=null, documentObjectUrl='';
 
 const T={
 kk:{
@@ -28,7 +29,7 @@ payText:'Жеке QR-код арқылы төлеңіз. Төлем растал
 openKaspi:'Kaspi арқылы төлеу',iPaid:'Төлемді тексеру',waitTitle:'Төлем тексерілуде',
 waitText:'Төлем расталғаннан кейін тест автоматты түрде ашылады.',refresh:'Жаңарту',
 testRule:'Әр сұрақта бір дұрыс жауап бар.',finish:'Тестті аяқтау',yourScore:'Сіздің нәтижеңіз',
-printDiploma:'Дипломды сақтау / басып шығару',footText:'1–11 сынып оқушыларына арналған математикалық ойын-конкурс'
+printDiploma:'Дипломды сақтау / басып шығару',openDocument:'Дипломды ашу',savePhone:'Телефонға сақтау',downloadPng:'PNG жүктеу',printDocument:'Басып шығару',downloadHelp:'iPhone: «Телефонға сақтау» → «Файлдарға сақтау». Instagram ішінде ашылмаса, Safari немесе Chrome пайдаланыңыз.',footText:'1–11 сынып оқушыларына арналған математикалық ойын-конкурс'
 },
 ru:{
 brandSub:'Математика · 1–11 классы',about:'О конкурсе',join:'Участвовать',results:'Награды',org:'Панель организатора',
@@ -53,7 +54,7 @@ payText:'Оплатите по индивидуальному QR. После п�
 openKaspi:'Оплатить через Kaspi',iPaid:'Проверить оплату',waitTitle:'Оплата проверяется',
 waitText:'После подтверждения оплаты тест откроется автоматически.',refresh:'Обновить',
 testRule:'В каждом вопросе один правильный ответ.',finish:'Завершить тест',yourScore:'Ваш результат',
-printDiploma:'Сохранить / распечатать диплом',footText:'математический игровой конкурс для учащихся 1–11 классов'
+printDiploma:'Сохранить / распечатать диплом',openDocument:'Открыть диплом',savePhone:'Сохранить на телефон',downloadPng:'Скачать PNG',printDocument:'Распечатать',downloadHelp:'iPhone: «Сохранить на телефон» → «Сохранить в Файлы». Если сайт открыт внутри Instagram, используйте Safari или Chrome.',footText:'математический игровой конкурс для учащихся 1–11 классов'
 }};
 
 const regionsKK=['Астана қ.','Алматы қ.','Шымкент қ.','Абай облысы','Ақмола облысы','Ақтөбе облысы','Алматы облысы','Атырау облысы','Шығыс Қазақстан облысы','Жамбыл облысы','Жетісу облысы','Батыс Қазақстан облысы','Қарағанды облысы','Қостанай облысы','Қызылорда облысы','Маңғыстау облысы','Павлодар облысы','Солтүстік Қазақстан облысы','Түркістан облысы','Ұлытау облысы'];
@@ -164,6 +165,29 @@ byId('paidBtn').addEventListener('click',checkStatus);
 byId('refreshBtn').addEventListener('click',checkStatus);
 byId('finishBtn').addEventListener('click',()=>{if(confirm(uiLang==='kk'?'Тестті аяқтайсыз ба?':'Завершить тест?'))submitTest()});
 byId('printBtn').addEventListener('click',()=>window.print());
+byId('shareDocBtn').addEventListener('click',shareDocument);
+
+async function prepareDocumentFile(filename){
+  documentFile=null;
+  if(documentObjectUrl){URL.revokeObjectURL(documentObjectUrl);documentObjectUrl=''}
+  if(!token)return;
+  try{
+    const response=await fetch('/api/document/'+encodeURIComponent(token),{cache:'no-store'});
+    if(!response.ok)throw new Error('document');
+    const blob=await response.blob();
+    documentFile=new File([blob],filename,{type:'image/png'});
+    documentObjectUrl=URL.createObjectURL(documentFile);
+    byId('downloadDocBtn').href=documentObjectUrl;
+  }catch(e){/* Direct open and download links remain available. */}
+}
+
+async function shareDocument(){
+  const direct='/api/document/'+encodeURIComponent(token)+'?download=1';
+  if(documentFile && navigator.canShare && navigator.canShare({files:[documentFile]})){
+    try{await navigator.share({files:[documentFile],title:documentFile.name});return}catch(e){if(e && e.name==='AbortError')return}
+  }
+  const link=document.createElement('a');link.href=documentObjectUrl||direct;link.download=documentFile?documentFile.name:'KENGURU.png';document.body.appendChild(link);link.click();link.remove();
+}
 
 async function checkStatus(){
   if(!token)return;
@@ -226,7 +250,13 @@ function showResult(s){
   supervisorEl.textContent=s.supervisor?'Жетекшісі: '+s.supervisor:'';
   fitSupervisorText(supervisorEl,isCertificate);
   byId('dipNo').textContent='№ '+(s.diploma_no||'');
-  byId('printBtn').textContent=isCertificate?(uiLang==='kk'?'Сертификатты сақтау / басып шығару':'Сохранить / распечатать сертификат'):(uiLang==='kk'?'Дипломды сақтау / басып шығару':'Сохранить / распечатать диплом')
+  const path='/api/document/'+encodeURIComponent(token);
+  const filename=(isCertificate?'KENGURU-certificate-':'KENGURU-diploma-')+(s.diploma_no||'document')+'.png';
+  byId('openDocBtn').href=path;
+  byId('downloadDocBtn').href=path+'?download=1';
+  byId('downloadDocBtn').download=filename;
+  byId('openDocBtn').textContent=isCertificate?(uiLang==='kk'?'Сертификатты ашу':'Открыть сертификат'):(uiLang==='kk'?'Дипломды ашу':'Открыть диплом');
+  void prepareDocumentFile(filename)
 }
 function fitSupervisorText(el,isCertificate){
   const length=(el.textContent||'').trim().length;

@@ -3,6 +3,9 @@
 @media(max-width:600px){.wrap{width:min(100% - 24px,1160px)}.navrow{height:68px}.brand img{width:44px;height:44px}.brand b{font-size:17px}.hero{padding:42px 0}.heroGrid{gap:28px}h1{font-size:46px}.lead{font-size:16px}.heroButtons{display:grid}.miniFacts span{font-size:15px}.heroCard{padding:22px}.cards4,.awards,.formgrid{grid-template-columns:1fr}.wide{grid-column:auto}.section{padding:55px 0}.panel{padding:20px;border-radius:20px}.testHead{top:68px;padding:16px}.question{padding:22px 18px}.diploma{padding:34px 20px;min-height:580px}.dipLabel{font-size:42px;margin-top:45px}.diploma .name{font-size:26px}.foot{display:grid;gap:14px}.payBox .btn{width:100%;margin-right:0}}
 @media print{body *{visibility:hidden}.diploma,.diploma *{visibility:visible}.diploma{position:absolute;inset:0;width:100%;margin:0;border:8px double var(--blue);print-color-adjust:exact;-webkit-print-color-adjust:exact}.noprint{display:none!important}}
 
+.docActions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:16px auto 0}.docActions .btn{min-height:48px}.downloadHelp{max-width:720px;margin:12px auto 0;color:var(--muted);font-size:13px;line-height:1.55}
+@media(max-width:600px){.docActions{display:grid;grid-template-columns:1fr}.docActions .btn{width:100%}.downloadHelp{text-align:left}}
+
 /* KENG 2026 official diploma / certificate templates */
 .diplomaTemplate{position:relative;margin:20px auto 0;padding:0;border:0;width:100%;max-width:1120px;min-height:0;aspect-ratio:1414/1000;overflow:hidden;background:#fff;box-shadow:0 14px 40px rgba(13,52,86,.13)}
 .diplomaTemplate .diplomaBg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}

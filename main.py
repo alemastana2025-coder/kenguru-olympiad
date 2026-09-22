@@ -61,6 +61,11 @@ def init_db():
                 c.execute("ALTER TABLE participants ADD COLUMN supervisor TEXT NOT NULL DEFAULT ''")
 init_db()
 
+# A real image download is more reliable than window.print() on iPhone,
+# Android and in-app browsers.
+from document_image import register_document_route
+register_document_route(app, db, BASE)
+
 # Original, generated-style question bank. The uploaded Kangaroo example is used only as a style reference.
 
 def ru_question(q:str)->str:

@@ -47,11 +47,11 @@ function openDiploma(token){
 <style>
 body{margin:0;background:#eef4f8;font-family:Arial,sans-serif}
 .docbar{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:12px;background:#fff;border-bottom:1px solid #dbe6ef}
-.docbar button{border:0;padding:11px 16px;border-radius:9px;font-weight:800;cursor:pointer;background:#087dcc;color:#fff}
+.docbar button,.docbar a{border:0;padding:11px 16px;border-radius:9px;font-weight:800;cursor:pointer;background:#087dcc;color:#fff;text-decoration:none}
 .docwrap{max-width:1120px;margin:20px auto;padding:0 12px}
 @media print{.docbar{display:none!important}.docwrap{margin:0;padding:0;max-width:none}}
 </style></head><body>
-<div class=\"docbar noprint\"><button id=\"printNow\">⬇ Жүктеу / басып шығару</button></div>
+<div class=\"docbar noprint\"><a href=\"/api/document/${encodeURIComponent(token)}\" target=\"_blank\">Құжатты ашу</a><a href=\"/api/document/${encodeURIComponent(token)}?download=1\" download>PNG жүктеу</a><button id=\"printNow\">Басып шығару</button></div>
 <div class=\"docwrap\">
   <div class=\"diploma diplomaTemplate${isCertificate?' certificate':''}\" id=\"adminDiploma\">
     <img class=\"diplomaBg\" id=\"aBg\" src=\"${isCertificate?'/static/certificate_template.png':'/static/diploma_template.png'}\" alt=\"\">
