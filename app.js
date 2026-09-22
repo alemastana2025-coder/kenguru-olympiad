@@ -3,7 +3,7 @@ window.__KENGURU_APIPAY_V6__ = true; // disables the old separate ApiPay patch
 
 let uiLang='kk', token=localStorage.getItem('kng_token')||'',
     timerId=null, payPoll=null, left=1800, currentTest=null,
-    documentFile=null, documentObjectUrl='';
+    documentFile=null, documentObjectUrl='', testLoading=false;
 
 const T={
 kk:{
@@ -207,14 +207,14 @@ async function checkStatus(){
   }
 }
 async function loadTest(){
-  if(currentTest)return;
+  if(currentTest || testLoading)return; testLoading=true;
   let r=await fetch('/api/test/'+encodeURIComponent(token));
   if(!r.ok){alert(await r.text());return}
   currentTest=await r.json();uiLang=currentTest.lang;applyLang();
   byId('who').textContent=currentTest.full_name+' · '+currentTest.grade+(uiLang==='kk'?' сынып':' класс');
   byId('testForm').innerHTML=currentTest.questions.map((q,i)=>`<div class="question"><div class="qmeta">${i+1}/30 · ${q.points} ${uiLang==='kk'?'балл деңгейі':'балла уровень'}</div><h3>${esc(q.text)}</h3><div class="opts">${q.options.map((o,k)=>`<label class="opt"><input type="radio" name="${q.id}" value="${escAttr(o)}"><b>${String.fromCharCode(65+k)})</b> ${esc(o)}</label>`).join('')}</div></div>`).join('');
   byId('testForm').addEventListener('change',updateProgress);
-  left=Math.max(0,currentTest.seconds_left||1800);tick();
+  left=Math.max(0,Number(currentTest.seconds_left ?? 1800));tick(); clearInterval(timerId); testLoading=false;
   timerId=setInterval(()=>{left--;tick();if(left<=0){clearInterval(timerId);submitTest()}},1000)
 }
 function updateProgress(){
