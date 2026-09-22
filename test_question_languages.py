@@ -152,6 +152,53 @@ class QuestionLanguageTests(unittest.TestCase):
             after = [dict(r) for r in c.execute('SELECT * FROM participants ORDER BY id')]
         self.assertEqual(before, after)
 
+    def test_admin_can_correct_participant_without_changing_payment_result_or_diploma(self):
+        self.participant('correct-me', grade=4, started=True, submitted=True)
+        with self.main.db() as c:
+            before = dict(c.execute("SELECT * FROM participants WHERE token='correct-me'").fetchone())
+
+        response = self.client.put('/api/admin/participant/correct-me', json={
+            'password': self.main.ADMIN_PASSWORD,
+            'full_name': 'ӘЛИХАН СЕРІКҰЛЫ',
+            'school': '№99 мектеп-гимназиясы',
+            'supervisor': 'АХМЕТОВА АЙГҮЛ СЕРІКҚЫЗЫ',
+            'grade': 5,
+        })
+        self.assertEqual(response.status_code, 200, response.text)
+
+        with self.main.db() as c:
+            after = dict(c.execute("SELECT * FROM participants WHERE token='correct-me'").fetchone())
+        self.assertEqual(after['full_name'], 'ӘЛИХАН СЕРІКҰЛЫ')
+        self.assertEqual(after['school'], '№99 мектеп-гимназиясы')
+        self.assertEqual(after['supervisor'], 'АХМЕТОВА АЙГҮЛ СЕРІКҚЫЗЫ')
+        self.assertEqual(after['grade'], 5)
+        for field in ('payment_status', 'score', 'award', 'diploma_no', 'submitted_at', 'question_ids'):
+            self.assertEqual(after[field], before[field], field)
+
+    def test_admin_cannot_change_grade_during_active_attempt_but_can_fix_text(self):
+        self.participant('active-edit', grade=3, started=True)
+        payload = {
+            'password': self.main.ADMIN_PASSWORD,
+            'full_name': 'ДҰРЫС АТЫ ЖӨНІ',
+            'school': 'Дұрыс мектеп',
+            'supervisor': 'ДҰРЫС ЖЕТЕКШІ АТЫ',
+            'grade': 4,
+        }
+        blocked = self.client.put('/api/admin/participant/active-edit', json=payload)
+        self.assertEqual(blocked.status_code, 409)
+        with self.main.db() as c:
+            unchanged = dict(c.execute("SELECT * FROM participants WHERE token='active-edit'").fetchone())
+        self.assertEqual(unchanged['grade'], 3)
+        self.assertEqual(unchanged['full_name'], 'LOCAL TEST')
+
+        payload['grade'] = 3
+        corrected = self.client.put('/api/admin/participant/active-edit', json=payload)
+        self.assertEqual(corrected.status_code, 200, corrected.text)
+        with self.main.db() as c:
+            saved = dict(c.execute("SELECT * FROM participants WHERE token='active-edit'").fetchone())
+        self.assertEqual(saved['full_name'], 'ДҰРЫС АТЫ ЖӨНІ')
+        self.assertEqual(saved['question_ids'], unchanged['question_ids'])
+
     def test_database_question_overrides_keep_translations_after_admin_save(self):
         question = copy.deepcopy(self.bank[1][7])
         question['ru'] += ' Выберите ответ.'

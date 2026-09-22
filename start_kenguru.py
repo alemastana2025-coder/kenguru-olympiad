@@ -177,7 +177,7 @@ function kSyncData(){
 async function kLoadParticipants(page=KPAGE.participants){
   const q=(kEl('find')?.value||'').trim(), grade=kEl('gfilter')?.value||'';
   const j=await kFetch('participants',page,q,grade);KPAGE.participants=j.page;KPART=j.items||[];kSyncData();kStats(j.stats);
-  kEl('peopleRows').innerHTML=KPART.map(x=>`<tr><td>${x.id}</td><td><b>${E(x.full_name)}</b><br><small>${E(x.region)}, ${E(x.locality)}</small></td><td>${x.grade}</td><td>${E(x.phone)}</td><td>${E(x.school)}${x.supervisor?`<br><small>Жетекші: ${E(x.supervisor)}</small>`:''}</td><td>${badge(x)}</td><td>${x.payment_status!=='paid'?`<button class="btnx blue" onclick="act('${x.token}','approve')">✓ Растау</button>`:`<button class="btnx gray" disabled>✓ Расталды</button>`} <button class="btnx red" onclick="delP('${x.token}')">Өшіру</button></td></tr>`).join('')||'<tr><td colspan="7">Қатысушы жоқ</td></tr>';
+  kEl('peopleRows').innerHTML=KPART.map(x=>`<tr><td>${x.id}</td><td><b>${E(x.full_name)}</b><br><small>${E(x.region)}, ${E(x.locality)}</small></td><td>${x.grade}</td><td>${E(x.phone)}</td><td>${E(x.school)}${x.supervisor?`<br><small>Жетекші: ${E(x.supervisor)}</small>`:''}</td><td>${badge(x)}</td><td>${x.payment_status!=='paid'?`<button class="btnx blue" onclick="act('${x.token}','approve')">✓ Растау</button>`:`<button class="btnx gray" disabled>✓ Расталды</button>`} <button class="btnx gray" onclick="openParticipantEditor('${x.token}')">✎ Түзету</button> <button class="btnx red" onclick="delP('${x.token}')">Өшіру</button></td></tr>`).join('')||'<tr><td colspan="7">Қатысушы жоқ</td></tr>';
   kPager('peoplePager','participants',j)
 }
 async function kLoadPayments(page=KPAGE.payments){

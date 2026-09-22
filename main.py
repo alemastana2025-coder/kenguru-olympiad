@@ -413,6 +413,13 @@ class AdminAction(BaseModel):
     token: str
     action: str
 
+class AdminParticipantUpdate(BaseModel):
+    password: str
+    full_name: str = Field(min_length=3, max_length=120)
+    school: str = Field(min_length=2, max_length=180)
+    supervisor: str = Field(min_length=3, max_length=120)
+    grade: int = Field(ge=1, le=11)
+
 @app.get('/', response_class=HTMLResponse)
 def home():
     return (BASE/'static/index.html').read_text(encoding='utf-8')
@@ -500,6 +507,35 @@ def admin_action(a: AdminAction):
     with db() as c:
         c.execute('UPDATE participants SET payment_status=? WHERE token=?',(status,a.token))
     return {'ok':True}
+
+@app.put('/api/admin/participant/{token}')
+def admin_update_participant(token: str, update: AdminParticipantUpdate):
+    if not secrets.compare_digest(update.password, ADMIN_PASSWORD):
+        raise HTTPException(401, 'Wrong password')
+
+    full_name = update.full_name.strip()
+    school = update.school.strip()
+    supervisor = update.supervisor.strip()
+    if len(full_name) < 3 or len(school) < 2 or len(supervisor) < 3:
+        raise HTTPException(422, 'Required fields are too short')
+
+    with db() as c:
+        row = c.execute('SELECT * FROM participants WHERE token=?', (token,)).fetchone()
+        if not row:
+            raise HTTPException(404, 'Participant not found')
+        if row['started_at'] and not row['submitted_at'] and int(row['grade']) != update.grade:
+            raise HTTPException(409, 'Сыныпты тест аяқталғанша өзгертуге болмайды')
+        c.execute(
+            '''UPDATE participants
+               SET full_name=?, school=?, supervisor=?, grade=?
+               WHERE token=?''',
+            (full_name, school, supervisor, update.grade, token)
+        )
+        saved = c.execute('SELECT * FROM participants WHERE token=?', (token,)).fetchone()
+
+    result = dict(saved)
+    result.pop('question_ids', None)
+    return {'ok': True, 'participant': result}
 
 @app.get('/api/admin/list')
 def admin_list(password:str):
