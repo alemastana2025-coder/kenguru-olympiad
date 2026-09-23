@@ -10,7 +10,7 @@ from question_languages import localized_options, answer_is_correct
 BASE = Path(__file__).parent
 DB = BASE / 'kenguru.sqlite3'
 PRICE = 1000
-PAY_URL = 'https://pay.kaspi.kz/pay/ylajsf3h'
+PAY_URL = 'https://pay.kaspi.kz/pay/pp3rueyw'
 ADMIN_PASSWORD = os.getenv('KENGURU_ADMIN_PASSWORD', 'change-me-now')
 TEST_SECONDS = 30 * 60
 GRACE_SECONDS = 45
