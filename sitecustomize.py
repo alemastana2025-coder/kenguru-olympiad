@@ -1,6 +1,7 @@
 """KENGURU production bootstrap.
 1) Swaps sqlite3 for PostgreSQL compatibility when DATABASE_URL exists.
 2) Extends every FastAPI app with KENGURU admin routes.
+3) Adds organizer-authorized, persistent 10-second self-reported access.
 """
 import os, sys
 
@@ -22,6 +23,8 @@ try:
             register_admin_extra(self)
         except Exception as e:
             print("[KENGURU] admin extension error:", repr(e))
+        from kenguru_auto_access import register_auto_access
+        register_auto_access(self)
     FastAPI.__init__ = _kenguru_init
 except Exception as e:
     print("[KENGURU] FastAPI hook error:", repr(e))
