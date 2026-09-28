@@ -28,6 +28,8 @@ try:
         register_auto_access(self)
         from kenguru_content_guard import register_content_guard
         register_content_guard(self)
+        from kenguru_test_safety import register_test_safety
+        register_test_safety(self)
     FastAPI.__init__ = _kenguru_init
 except Exception as e:
     print("[KENGURU] FastAPI hook error:", repr(e))
